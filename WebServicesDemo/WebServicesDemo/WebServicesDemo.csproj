@@ -68,6 +68,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CalculatorWebService.asmx" />
+    <Content Include="StudentService.asmx" />
+    <Content Include="StudentWebform.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +78,18 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Student.cs" />
+    <Compile Include="StudentService.asmx.cs">
+      <DependentUpon>StudentService.asmx</DependentUpon>
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="StudentWebform.aspx.cs">
+      <DependentUpon>StudentWebform.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="StudentWebform.aspx.designer.cs">
+      <DependentUpon>StudentWebform.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

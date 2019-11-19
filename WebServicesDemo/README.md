@@ -1,3 +1,5 @@
+# ASMS Web Service Tutorial
+From [kudvenkat's ASP.NET Web Services tutorial](https://www.youtube.com/watch?v=xzJm0lPIoJY&list=PL6n9fhu94yhW6VEqiXQvS2bLb5KaLTo7c)
 ## Part 1: Introduction to ASP.NET Web Services
 Web Services have `.asmx` extension. For this reason web services are also often called "ASMX Web Services"
 
@@ -27,14 +29,15 @@ __Creating an ASMX WebService__
 * Create an Web Service template file (.asmx)
 * You will find a generated code in you web service file.
 
-## Part 2: consuming a Web Service  
-To consume a web service, you generate a proxy class in Visual Studio using the web service's WSDL document.
+## Part 2: Consuming a Web Service  
+To consume a web service, you generate a proxy class in Visual Studio using the web service's WSDL document.  
 __Generating a Proxy class using Visual studio__
 * First get the link to the WSDL document.
- * Right click on the Web Servvice `.asmx` file and click "View in Browser"
+ * Right click on the Web Service's `.asmx` file and click "View in Browser"
  * Goto the Browser and click on "Service Description"
- * Copy the URL of the WSDL document from the browser location bar
-* Add an ASP.NET Web Application to the solution containing the webservice. This application will be the client to consume the web services.
+ * Copy the URL of the WSDL document from the browser location bar (the query string section of the URL may be omitted).
+* Create a new Empty ASP.NET Web Application in the solution containing the webservice.  This application will be the client to consume the web services
+* Add an ASP.NET WebForm file(`.aspx`) to the newly created Web Application above.
 * Click on the Client application in the Solution explorer.
 * Right-click on `Reference` and click   `Add service Reference`
 * Enter the URL of the WSDL document obtained earlier on to the address input and click on "Go" and the web service will be detected by Visual studio
@@ -58,16 +61,16 @@ Visual studio generates a proxy class using the WSDL (Web Service Description La
 2. The parameters and their types
 3. The return types of the methods  
 
-This information is then used by visual studio to create the proxy class. The client application calls the proxy class method. The proxy class will then serialize the parameters, prepare a SOAP request message and sends it to the webservice. The webservice execusted the method and returns a SOAP response message to the proxy, The proxy class will then deserialize the SOAP response message and hands it the client application.
+This information is then used by visual studio to create the proxy class. The client application calls the proxy class method. The proxy class will then serialize the parameters, prepare a SOAP request message and sends it to the webservice. The webservice executes the method and returns a SOAP response message to the proxy, The proxy class will then deserialize the SOAP response message and hands it the client application.
 
-## Part 3:  Using ASP.NET Session Sate in a Web Service  
-To use ASP.NET Session object in a Web Service, the web service class must inherit from `System.Web.Services.webService` class and `EnableSession` property of `WebMethod` attribute must be set to `true`.
+## Part 3:  Using ASP.NET Session State in a Web Service  
+To use ASP.NET Session object in a Web Service, the web service class must inherit from `System.Web.Services.WebService` class and `EnableSession` property of `WebMethod` attribute must be set to `true`.
 ```
 [WebService(Namespace="http://mywebstation.net")]
 public class CalculatorWebService :System.Web.Services.WebService
 {
   [WebMethod(EnableSession=true)]
-  public int Add(nint fisrtNumber, int secondNumber)
+  public int Add(int firstNumber, int secondNumber)
   {
     return firstNumber + secondNumber;
   }
@@ -122,3 +125,99 @@ In general, set BufferResponse to false, only when the XML Web Service method re
  If you don't specify the MessageName of a WebMethod, then the MessageName of the WebMethod becomes the method name by default.
 
 ## Part 6: Calling ASP.NET Web Service from JavaScript using AJAX  
+Steps to call a web service from JavaScript using ASP.NET AJAX  
+1. Decorate web service class with `[System.Web.Script.Services.ScriptService]`  
+```
+[System.Web.Script.Services.ScriptService]
+public class CalculateWebService : System.Web.Services.WebService
+```
+
+2. Include `ScriptManager` control on the WebForm from where you want to call the web service and specify the path of the web service.  
+```
+<asp:ScriptManager ID="ScriptManager1" runat="server">
+    <Services>
+      <asp:ServiceReference Path="~/StudentService.asmx" />
+    </Services>
+</asp:Manager>
+```
+
+__Create the database__  
+```
+CREATE DATABASE WebServicesDemo
+```
+__Create the table__  
+```
+use WebServicesDemo;
+
+CREATE TABLE tblStudents
+(
+  ID int IDENTITY NOT NULL PRIMARY KEY,
+  Name NVARCHAR(40) NOT NULL,
+  Gender VARCHAR(10)NOT NULL CHECK(Gender IN('Male', 'Female')),
+  TotalMarks int NOT NULL
+)
+```
+__Insert data into the table__  
+```
+INSERT INTO tblStudents Values('Mark Hestin', 'Male', 900);
+INSERT INTO tblStudents Values('Pam Nocholas', 'Female', 760);
+INSERT INTO tblStudents Values('John Steson', 'Male', 980);
+```
+__Create a stored procedure to retrieve student record, given the student ID__  
+```
+CREATE Proc spGetStudentByID
+@ID int
+as
+Begin
+  Select ID, Name, Gender, TotalMarks
+  FROM tblStudents where ID = @ID
+End
+
+```  
+__Create a Model class for the table__   
+The model class, `Student.cs` will have the table feilds as properties.  
+```
+class Student
+{
+    public int ID { set; get; }
+    public string Name { set; get; }
+    public string Gender { set; get; }
+    public int TotalMarks { set; get; }
+}
+```
+__Create the web service__   
+Create the Web service and add a method to that takes an ID parameter as argument and reads the student record with corresponding ID form the database table.  
+
+__Add a connectionString element to the web.config file__  
+```
+<configuration>
+ ...
+ <connectionStrings>
+   <add name="DBCS" connectionString="Data Source=TOCHUKWUN\CHUCKSDB;Initial Catalog=WebServicesDemo;UserID=sa;Password=*****" providerName="System.Data.SqlClient" />
+ </connectionStrings>
+ ...
+</configuration>
+```
+
+__To generate a connection string__  
+* Click on the "Server Explorer" panel on the left of Visual Studio  
+* Right-click on "Data Connections" and click "Add Connection"
+* The Server name should be the name of your SQL Server Instance. See you Microsoft SQL Server Management Studio.
+* Fill in you SQL Server details and click "Test Connection"
+* After a successful connection, click on.
+* Right-click on the Connection created under the "Data Connections" in the Server explorer and then click on "Properties"
+* See the connection properties panel on the buttom right of the screen.
+* Copy the connection string and paste it as value to the `connectionString` attribute of the `add` element of the `ConnectionStrings` element as shown in the XML code snippet above.  
+
+By now you should be able to browse and test the new Webservice Methods.  
+
+__Create a Webform page in the Webservice project__  
+The Webform page should feature Text boxes to display student record. And a JavaScript function to trigger an AJAX request using the WebService class' method.  
+```
+function MakeRequest(){
+  WebServiceNamespace.WebServiceName.WebServiceMethodName(args, successCallback, failureCallback)
+}
+
+```  
+
+## Part 7: Real time example of calling live weather forcast  
